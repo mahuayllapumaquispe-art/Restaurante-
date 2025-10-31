@@ -1,0 +1,9 @@
+# Dependencias (¡Nunca subir esto!)
+node_modules/
+
+# Llaves secretas y contraseñas (¡NUNCA SUBIR ESTO!)
+serviceAccountKey.json
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
