@@ -1,8 +1,5 @@
-// ¡Importamos 'db' de nuestra conexión!
 const { db } = require('../Connection/Firestore.js');
 const coleccionPedidos = db.collection('pedidos');
-
-/* ... (Estructura del Pedido y funciones create, getAll) ... */
 const create = async (data) => {
   try {
     const tiempoExpiracion = 30 * 60 * 1000; 
@@ -38,34 +35,23 @@ const getAll = async () => {
   }
 };
 
-
-// --- ¡FUNCIÓN MODIFICADA! ---
-// (U)PDATE - Actualiza ESTADO y devuelve el 'piso' del pedido
 const updateEstado = async (id, nuevoEstado) => {
   try {
     const docRef = coleccionPedidos.doc(id);
-    
-    // Obtenemos el documento para saber el 'piso'
     const doc = await docRef.get();
     if (!doc.exists) {
       throw new Error("Pedido no encontrado al actualizar estado");
     }
-    const pisoDelPedido = doc.data().piso; // ¡Obtenemos el piso!
-
-    // Actualizamos el estado
+    const pisoDelPedido = doc.data().piso;
     await docRef.update({
       estado: nuevoEstado
     });
-    
-    // Devolvemos el piso para la notificación
     return { id, nuevoEstado, piso: pisoDelPedido }; 
   } catch (error) {
     console.error("Error al actualizar estado del pedido:", error);
     throw new Error("Error al actualizar estado");
   }
 };
-
-// FUNCIÓN DE LIMPIEZA - Cancelar expirados
 const cancelarExpirados = async () => {
   try {
     const ahora = new Date();
@@ -93,7 +79,6 @@ const cancelarExpirados = async () => {
   }
 };
 
-// FUNCIÓN KDS - Busca pedidos 'pagados' para un destino
 const getPedidosParaKDS = async (tipoKDS) => {
   try {
     const snapshot = await coleccionPedidos
@@ -110,7 +95,6 @@ const getPedidosParaKDS = async (tipoKDS) => {
   }
 };
 
-// FUNCIÓN DE CAJA - Añade pago a un lote
 const registrarPagoPorTicket = async (batch, ticketId) => {
   try {
     const snapshot = await coleccionPedidos
@@ -129,7 +113,6 @@ const registrarPagoPorTicket = async (batch, ticketId) => {
   }
 };
 
-// FUNCIÓN MOZO - Busca pedidos 'listos' para un piso
 const getPedidosListosPorPiso = async (piso) => {
   try {
     const snapshot = await coleccionPedidos
@@ -146,7 +129,6 @@ const getPedidosListosPorPiso = async (piso) => {
   }
 };
 
-// FUNCIÓN MOZO - Cancela un pedido (si está pendiente)
 const cancelarPedido = async (pedidoId) => {
   try {
     const docRef = coleccionPedidos.doc(pedidoId);
@@ -164,7 +146,6 @@ const cancelarPedido = async (pedidoId) => {
   }
 };
 
-// FUNCIÓN REPORTES - Obtiene items vendidos
 const getItemsVendidosPorRango = async (fechaInicio, fechaFin) => {
   try {
     const estadosPagados = ['pagado', 'en_preparacion', 'listo', 'entregado'];
@@ -196,8 +177,30 @@ const getItemsVendidosPorRango = async (fechaInicio, fechaFin) => {
   }
 };
 
+const cancelarPedidoPorTicket = async (ticketId) => {
+  try {
+    const snapshot = await coleccionPedidos
+      .where('ticketId', '==', ticketId)
+      .limit(1)
+      .get();
 
-// Exportamos todas las funciones
+    if (snapshot.empty) {
+      throw new Error("Ticket no encontrado");
+    }
+
+    const doc = snapshot.docs[0];
+    const pedido = doc.data();
+    if (pedido.estado !== 'pendiente') {
+      throw new Error(`No se puede cancelar. El pedido ya está '${pedido.estado}'.`);
+    }
+    await doc.ref.update({ estado: 'cancelado' });
+    return pedido.mesaId; 
+
+  } catch (error) {
+    console.error(`Error al cancelar pedido por ticket ${ticketId}:`, error);
+    throw error;
+  }
+};
 module.exports = {
   create,
   getAll,
@@ -207,5 +210,6 @@ module.exports = {
   registrarPagoPorTicket,
   getPedidosListosPorPiso,
   cancelarPedido,
-  getItemsVendidosPorRango
+  getItemsVendidosPorRango,
+  cancelarPedidoPorTicket
 };

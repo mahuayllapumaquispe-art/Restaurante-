@@ -1,8 +1,3 @@
-    // Este script es solo para inicializar las mesas en la BD.
-    // Se ejecuta una sola vez.
-
-    // Usamos ../ para "subir" de 'utils' a la carpeta raíz
-    // y luego entrar a 'Connection/Firestore.js'
 const { db } = require('../Connection/Firestore.js');
     async function crearMesas() {
     console.log('Iniciando la creación de las 60 mesas...');
@@ -31,11 +26,9 @@ const { db } = require('../Connection/Firestore.js');
 
     try {
         await batch.commit();
-        console.log('✅ ¡Éxito! Se crearon 60 mesas en la colección "mesas".');
+        console.log(' ¡Éxito! Se crearon 60 mesas en la colección "mesas".');
     } catch (error) {
-        console.error('❌ Error al crear las mesas:', error);
+        console.error(' Error al crear las mesas:', error);
     }
     }
-
-    // Ejecutamos la función
     crearMesas();

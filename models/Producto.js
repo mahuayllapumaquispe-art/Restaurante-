@@ -1,10 +1,6 @@
-// ¡Importamos 'db' y 'admin' de nuestra conexión!
 const { db, admin } = require('../Connection/Firestore.js');
 const coleccionProductos = db.collection('productos');
 
-/* ... (Estructura del Producto) ... */
-
-// (C)REATE - Crear un nuevo producto (RF13)
 const create = async (data) => {
   try {
     const docRef = await coleccionProductos.add(data);
@@ -15,7 +11,6 @@ const create = async (data) => {
   }
 };
 
-// (R)EAD - Obtener todos los productos
 const getAll = async () => {
   try {
     const snapshot = await coleccionProductos.orderBy('categoria').orderBy('nombre').get();
@@ -33,7 +28,6 @@ const getAll = async () => {
   }
 };
 
-// (R)EAD - Obtener un producto por su ID
 const getById = async (id) => {
   try {
     const docRef = coleccionProductos.doc(id);
@@ -46,7 +40,7 @@ const getById = async (id) => {
   }
 };
 
-// (U)PDATE - Actualizar un producto
+
 const update = async (id, data) => {
   try {
     const docRef = coleccionProductos.doc(id);
@@ -58,7 +52,6 @@ const update = async (id, data) => {
   }
 };
 
-// (D)ELETE - Eliminar un producto
 const remove = async (id) => {
   try {
     const docRef = coleccionProductos.doc(id);
@@ -70,7 +63,6 @@ const remove = async (id) => {
   }
 };
 
-// (RF11) Añade descuento de stock a un lote (batch)
 const descontarStock = (batch, productoId, cantidadADescontar) => {
   try {
     const docRef = coleccionProductos.doc(productoId);
@@ -82,13 +74,11 @@ const descontarStock = (batch, productoId, cantidadADescontar) => {
   }
 };
 
-// --- ¡NUEVA FUNCIÓN! (RF11 - Alerta) ---
-// Obtiene productos con stock por debajo de un umbral
 const getStockBajo = async (umbral) => {
   try {
     const snapshot = await coleccionProductos
       .where('stock', '<=', umbral)
-      .orderBy('stock', 'asc') // Opcional: mostrar los más críticos primero
+      .orderBy('stock', 'asc') 
       .get();
       
     const productos = [];
@@ -102,7 +92,6 @@ const getStockBajo = async (umbral) => {
 
   } catch (error) {
     console.error("Error al obtener stock bajo:", error);
-    // (Recuerda crear el índice para 'stock' en la col. 'productos')
     throw error;
   }
 };
@@ -115,5 +104,5 @@ module.exports = {
   update,
   remove,
   descontarStock,
-  getStockBajo // <-- AÑADIDA
+  getStockBajo 
 };

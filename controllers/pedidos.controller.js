@@ -2,7 +2,6 @@ const Pedido = require('../models/Pedido.js');
 const Mesa = require('../models/Mesa.js'); 
 const Producto = require('../models/Producto.js');
 
-// (RF02) Crear Pedido
 const crearPedido = async (req, res) => {
   try {
     const { mesaId, items } = req.body;
@@ -52,7 +51,6 @@ const crearPedido = async (req, res) => {
   }
 };
 
-// (RF12) Obtener Todos los Pedidos
 const obtenerTodosLosPedidos = async (req, res) => {
   try {
     const pedidos = await Pedido.getAll();
@@ -62,7 +60,6 @@ const obtenerTodosLosPedidos = async (req, res) => {
   }
 };
 
-// (Admin/Caja/Cocina) Cambiar Estado
 const cambiarEstadoPedido = async (req, res) => {
   try {
     const { id } = req.params;
@@ -81,7 +78,6 @@ const cambiarEstadoPedido = async (req, res) => {
   }
 };
 
-// (Admin) Limpiar Pedidos Expirados
 const limpiarPedidosExpirados = async (req, res) => {
   try {
     const cantidad = await Pedido.cancelarExpirados();
@@ -95,7 +91,7 @@ const limpiarPedidosExpirados = async (req, res) => {
   }
 };
 
-// (RF09) Mozo - Obtener Pedidos Listos
+
 const obtenerPedidosListos = async (req, res) => {
   try {
     const { piso } = req.usuario;
@@ -110,7 +106,6 @@ const obtenerPedidosListos = async (req, res) => {
   }
 };
 
-// (RF09) Mozo - Marcar Pedido Entregado
 const marcarPedidoEntregado = async (req, res) => {
   try {
     const { id } = req.params;
@@ -123,17 +118,12 @@ const marcarPedidoEntregado = async (req, res) => {
 };
 
 
-// --- ¡NUEVA FUNCIÓN! (Cancelar Pedido) ---
-// (Mozo/Admin) Cancela un pedido PENDIENTE
 const cancelarPedidoPorMozo = async (req, res) => {
   try {
-    const { id } = req.params; // ID del pedido a cancelar
+    const { id } = req.params;
 
-    // 1. Cancelamos el pedido
-    // Esta función nos devuelve el mesaId si tiene éxito
     const mesaId = await Pedido.cancelarPedido(id);
 
-    // 2. Verificamos si la mesa se debe liberar
     const seLibero = await Mesa.verificarYLiberarMesa(mesaId);
     
     let message = `Pedido ${id} cancelado.`;
@@ -146,7 +136,6 @@ const cancelarPedidoPorMozo = async (req, res) => {
     res.status(200).json({ message });
 
   } catch (error) {
-    // Si el pedido no se puede cancelar (ej: ya está 'pagado')
     if (error.message.includes("No se puede cancelar")) {
       return res.status(400).json({ message: error.message });
     }
@@ -160,8 +149,6 @@ const cancelarPedidoPorMozo = async (req, res) => {
   }
 };
 
-
-// Exportamos todo
 module.exports = {
   crearPedido,
   obtenerTodosLosPedidos,
@@ -169,5 +156,5 @@ module.exports = {
   limpiarPedidosExpirados,
   obtenerPedidosListos,
   marcarPedidoEntregado,
-  cancelarPedidoPorMozo // <-- AÑADIDA
+  cancelarPedidoPorMozo 
 };
